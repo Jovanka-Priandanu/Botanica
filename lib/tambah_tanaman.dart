@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'tanaman_view.dart';
 
 class TambahTanaman extends StatefulWidget {
   const TambahTanaman({Key? key}) : super(key: key);
@@ -152,13 +151,17 @@ class _TambahTanamanState extends State<TambahTanaman> {
                         if (_image != null) {
                           saveImageLocally().then((imagePath) {
                             if (imagePath != null) {
-                              sendDataToApi(imagePath);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TanamanView(),
-                                ),
-                              );
+                              sendDataToApi(imagePath).then((isSuccess) {
+                                if (isSuccess) {
+                                  Navigator.of(context).pop(true); // Mengembalikan nilai true saat berhasil
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Gagal menyimpan data ke server.'),
+                                    ),
+                                  );
+                                }
+                              });
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -309,7 +312,7 @@ class _TambahTanamanState extends State<TambahTanaman> {
     }
   }
 
-  Future<void> sendDataToApi(String imageName) async {
+  Future<bool> sendDataToApi(String imageName) async {
     try {
       final uri = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/tanaman/addTanaman.php');
       var request = http.MultipartRequest('POST', uri);
@@ -322,11 +325,14 @@ class _TambahTanamanState extends State<TambahTanaman> {
       var response = await request.send();
       if (response.statusCode == 200) {
         print('Data berhasil disimpan');
+        return true;
       } else {
         print('Data gagal disimpan. Error: ${response.reasonPhrase}');
+        return false;
       }
     } catch (e) {
       print('Error: $e');
+      return false;
     }
   }
 }

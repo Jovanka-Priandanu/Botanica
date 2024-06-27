@@ -32,7 +32,7 @@ class _TambahSupplierState extends State<TambahSupplier> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Supplier berhasil ditambahkan')),
         );
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // Kembalikan nilai true jika berhasil
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal menambahkan supplier')),
@@ -92,6 +92,7 @@ class _TambahSupplierState extends State<TambahSupplier> {
               SizedBox(height: 10),
               TextFormField(
                 controller: _noController,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'No Supplier',
                   border: OutlineInputBorder(),

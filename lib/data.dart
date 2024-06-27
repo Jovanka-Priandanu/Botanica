@@ -42,7 +42,7 @@ class ApiLogin {
           body.map((dynamic item) => User.fromJson(item)).toList();
       return users;
     } else {
-      throw Exception('Failed to fetch users');
+      throw Exception('Gagal menarik data user');
     }
   }
 }
@@ -101,7 +101,7 @@ class ApiSupplier {
       List jsonResponse = json.decode(response.body);
       return jsonResponse.map((supplier) => Supplier.fromJson(supplier)).toList();
     } else {
-      throw Exception('Gagal mengambil data sup');
+      throw Exception('Gagal mengambil data supplier');
     }
   }
 
@@ -122,6 +122,43 @@ class ApiSupplier {
     } else {
       return false;
     }
+  }
+
+  // Delete Supplier
+   Future<void> deleteSupplier(String idSupplier) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/deleteSupplier.php'),
+      body: {'id_supplier': idSupplier},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Gagal menghapus data supplier');
+    }
+  }
+
+  // Detail Supplier
+  Future<Supplier> detailSupplierById(String idSupplier) async {
+    final response = await http.get(Uri.parse('$baseUrl/detailSupplier.php?id_supplier=$idSupplier'));
+    if (response.statusCode == 200) {
+      return Supplier.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Gagal menarik data berdasarkan ID Supplier');
+    }
+  }
+
+  // Edit Supplier
+   Future<bool> editSupplier(String idSupplier, String nama, String alamat, String no, String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/editSupplier.php'),
+      body: {
+        'id_supplier': idSupplier,
+        'nama_supplier': nama,
+        'alamat_supplier': alamat,
+        'no_supplier': no,
+        'email': email,
+      },
+    );
+    return response.statusCode == 200;
   }
 }
 

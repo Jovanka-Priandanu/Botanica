@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'data.dart';
 import 'tambah_supplier.dart';
+import 'edit_supplier.dart';
 
 class SupplierView extends StatefulWidget {
   @override
@@ -17,6 +18,78 @@ class _SupplierViewState extends State<SupplierView> {
     futureSuppliers = apiSupplier.fetchSuppliers();
   }
 
+  void _deleteSupplier(String idSupplier) async {
+    try {
+      await apiSupplier.deleteSupplier(idSupplier);
+      setState(() {
+        futureSuppliers = apiSupplier.fetchSuppliers();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Supplier berhasil dihapus')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghapus supplier: $e')),
+      );
+    }
+  }
+
+  void _confirmDelete(BuildContext context, String idSupplier) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Konfirmasi Hapus"),
+          content: Text("Apakah Anda yakin ingin menghapus supplier ini?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Batal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Hapus"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteSupplier(idSupplier);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToTambahSupplier(BuildContext context) async {
+    bool? isAdded = await Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => TambahSupplier()),
+    );
+
+    if (isAdded != null && isAdded) {
+      setState(() {
+        futureSuppliers = apiSupplier.fetchSuppliers();
+      });
+    }
+  }
+
+  Future<void> _navigateToEditSupplier(BuildContext context, String idSupplier) async {
+    Supplier supplier = await apiSupplier.detailSupplierById(idSupplier);
+    bool? isUpdated = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditSupplier(
+          supplier: supplier,
+        ),
+      ),
+    );
+
+    if (isUpdated != null && isUpdated) {
+      setState(() {
+        futureSuppliers = apiSupplier.fetchSuppliers();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,11 +100,7 @@ class _SupplierViewState extends State<SupplierView> {
         actions: [
           IconButton(
             icon: Icon(Icons.add, size: 40),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => TambahSupplier()),
-              );
-            },
+            onPressed: () => _navigateToTambahSupplier(context),
           ),
         ],
       ),
@@ -51,16 +120,13 @@ class _SupplierViewState extends State<SupplierView> {
               itemCount: suppliers.length,
               itemBuilder: (context, index) {
                 return SupplierCard(
+                  idSupplier: suppliers[index].idSupplier,
                   nama: suppliers[index].namaSupplier,
                   lokasi: suppliers[index].alamatSupplier,
                   kontak: suppliers[index].noSupplier,
                   email: suppliers[index].email,
-                  onEdit: () {
-                    // TODO: Navigate to EditSupplier page
-                  },
-                  onDelete: () {
-                    // TODO: Implement delete functionality
-                  },
+                  onEdit: () => _navigateToEditSupplier(context, suppliers[index].idSupplier),
+                  onDelete: () => _confirmDelete(context, suppliers[index].idSupplier),
                 );
               },
             );
@@ -72,6 +138,7 @@ class _SupplierViewState extends State<SupplierView> {
 }
 
 class SupplierCard extends StatelessWidget {
+  final String idSupplier;
   final String nama;
   final String lokasi;
   final String kontak;
@@ -80,6 +147,7 @@ class SupplierCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   SupplierCard({
+    required this.idSupplier,
     required this.nama,
     required this.lokasi,
     required this.kontak,
