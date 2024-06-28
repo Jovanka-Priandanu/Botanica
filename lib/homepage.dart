@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'tanaman_view.dart'; 
+import 'tanaman_view.dart';
 import 'main.dart';
 import 'supplier_view.dart';
 
@@ -67,7 +67,6 @@ class HomePage extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              // Ganti dengan navigasi yang sesuai
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => SupplierView()),
               );
@@ -98,9 +97,57 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
+          // Tambahkan 2 buah tombol ikon berbentuk bulat di bawah gambar Supplier
+         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                Material(
+                  shape: CircleBorder(),
+                  elevation: 3,
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      icon: Icon(Icons.add_box, size: 30),
+                      color: Colors.red,
+                      onPressed: () {
+                        // Aksi saat tombol ditekan
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8), // Jarak antara ikon dan teks
+                Text('Tambah Supply', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+            SizedBox(width: 32), // Jarak antara dua tombol
+            Column(
+              children: [
+                Material(
+                  shape: CircleBorder(),
+                  elevation: 3,
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      icon: Icon(Icons.shopping_bag, size: 30),
+                      color: Colors.blue,
+                      onPressed: () {
+                        // Aksi saat tombol ditekan
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8), // Jarak antara ikon dan teks
+                Text('Transaksi', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
         ],
       ),
     );
   }
 }
-
