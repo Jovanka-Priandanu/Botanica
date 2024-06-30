@@ -162,6 +162,38 @@ class ApiSupplier {
   }
 }
 
+  class Supply {
+    final int qtyIn;
+    final String dateIn;
+
+    Supply({
+      required this.qtyIn,
+      required this.dateIn,
+    });
+
+    factory Supply.fromJson(Map<String, dynamic> json) {
+      return Supply(
+        qtyIn: int.parse(json['qty_in']),
+        dateIn: json['date_in'],
+      );
+    }
+  }
+
+  class ApiSupply {
+    static const String baseUrl = 'https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/pengadaan';
+
+    Future<List<Supply>> fetchSupplyData() async {
+      final response = await http.get(Uri.parse('$baseUrl/listSupply.php'));
+
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        return jsonResponse.map((data) => Supply.fromJson(data)).toList();
+      } else {
+        throw Exception('Failed to load supply data');
+      }
+    }
+  }
+
 
 
 

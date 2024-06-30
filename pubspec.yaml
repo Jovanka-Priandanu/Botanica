@@ -35,6 +35,8 @@ dependencies:
   image_picker: ^1.1.2
   dotted_border: ^2.1.0
   path_provider: ^2.0.5
+  intl: ^0.17.0
+  flutter_datetime_picker: ^1.5.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -66,7 +68,6 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/images/tanaman/
     
 
   # An image asset can refer to one or more resolution-specific "variants", see
