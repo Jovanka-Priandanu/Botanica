@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'data.dart'; 
 
 class TambahSupply extends StatefulWidget {
   @override
@@ -8,84 +7,23 @@ class TambahSupply extends StatefulWidget {
 }
 
 class _TambahSupplyState extends State<TambahSupply> {
-  // Lists to store the fetched data
   List<Map<String, dynamic>> namaTanamanList = [];
   List<Map<String, dynamic>> namaSupplierList = [];
   List<Map<String, dynamic>> namaPenerimaList = [];
 
-  // Controllers for the input fields
   TextEditingController _quantityController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
 
-  // Variables to store selected values
   String? _selectedTanaman;
   String? _selectedSupplier;
   String? _selectedPenerima;
 
-  // Key for the form
   final _formKey = GlobalKey<FormState>();
-
-  // Function to fetch data from API
-  Future<void> fetchData() async {
-    final tanamanUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/tanaman/listTanaman.php');
-    final supplierUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/supplier/listSupplier.php');
-    final userUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/user/User.php');
-
-    try {
-      // Fetch nama tanaman data
-      final responseTanaman = await http.get(tanamanUrl);
-      if (responseTanaman.statusCode == 200) {
-        final jsonData = json.decode(responseTanaman.body) as List;
-        List<Map<String, dynamic>> fetchedNamaTanamanList = jsonData.map((item) => {
-          'id_tanaman': item['id_tanaman'],
-          'nama_tanaman': item['nama_tanaman'],
-        }).toList();
-        setState(() {
-          namaTanamanList = fetchedNamaTanamanList;
-        });
-      } else {
-        throw Exception('Failed to load nama tanaman data');
-      }
-
-      // Fetch nama supplier data
-      final responseSupplier = await http.get(supplierUrl);
-      if (responseSupplier.statusCode == 200) {
-        final jsonData = json.decode(responseSupplier.body) as List;
-        List<Map<String, dynamic>> fetchedNamaSupplierList = jsonData.map((item) => {
-          'id_supplier': item['id_supplier'],
-          'nama_supplier': item['nama_supplier'],
-        }).toList();
-        setState(() {
-          namaSupplierList = fetchedNamaSupplierList;
-        });
-      } else {
-        throw Exception('Failed to load nama supplier data');
-      }
-
-      // Fetch nama penerima data
-      final responseUser = await http.get(userUrl);
-      if (responseUser.statusCode == 200) {
-        final jsonData = json.decode(responseUser.body) as List;
-        List<Map<String, dynamic>> fetchedNamaPenerimaList = jsonData.map((item) => {
-          'id_user': item['id_user'],
-          'nama_lengkap': item['nama_lengkap'],
-        }).toList();
-        setState(() {
-          namaPenerimaList = fetchedNamaPenerimaList;
-        });
-      } else {
-        throw Exception('Failed to load nama penerima data');
-      }
-    } catch (error) {
-      print('Error fetching data: $error');
-      // Handle error as needed
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    fetchData(); // Fetch data when the widget initializes
+    fetchData();
   }
 
   @override
@@ -93,6 +31,22 @@ class _TambahSupplyState extends State<TambahSupply> {
     _quantityController.dispose();
     _dateController.dispose();
     super.dispose();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      final tanamanList = await ApiData.fetchNamaTanaman();
+      final supplierList = await ApiData.fetchNamaSupplier();
+      final penerimaList = await ApiData.fetchNamaPenerima();
+
+      setState(() {
+        namaTanamanList = tanamanList;
+        namaSupplierList = supplierList;
+        namaPenerimaList = penerimaList;
+      });
+    } catch (error) {
+      print('Error fetching data: $error');
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -109,36 +63,25 @@ class _TambahSupplyState extends State<TambahSupply> {
   }
 
   Future<void> _saveSupply() async {
-    final addSupplyUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/pengadaan/addSupply.php');
     try {
-      final response = await http.post(
-        addSupplyUrl,
-        body: {
-          'id_tanaman': _selectedTanaman!,
-          'id_supplier': _selectedSupplier!,
-          'id_user': _selectedPenerima!,
-          'qty_in': _quantityController.text,
-          'date_in': _dateController.text,
-        },
+      final response = await ApiData.saveSupply(
+        idTanaman: _selectedTanaman!,
+        idSupplier: _selectedSupplier!,
+        idPenerima: _selectedPenerima!,
+        quantity: _quantityController.text,
+        date: _dateController.text,
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Response data: $response');
 
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        print('Response data: $jsonData'); // Log response data
-        bool success = jsonData['success'] ?? false; // Handle null safely
-        if (success) {
-          // Handle success (e.g., show a success message or navigate to another screen)
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-        } else {
-          // Handle failure (e.g., show an error message)
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan data')));
-        }
+      bool success = response['success'] ?? false;
+      if (success) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Data gagal disimpan')));
       } else {
-        print('Failed to save data: ${response.body}');
-        throw Exception('Failed to save data');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
+        Navigator.of(context).pop();
       }
     } catch (error) {
       print('Error saving data: $error');
@@ -150,7 +93,14 @@ class _TambahSupplyState extends State<TambahSupply> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tambah Supply'),
+        backgroundColor: Colors.blue,
+        title: Text('Tambah Supply', style: TextStyle(color: Colors.white)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -159,6 +109,7 @@ class _TambahSupplyState extends State<TambahSupply> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
+                value: _selectedTanaman,
                 items: namaTanamanList.map((item) {
                   return DropdownMenuItem<String>(
                     value: item['id_tanaman'],
@@ -183,6 +134,7 @@ class _TambahSupplyState extends State<TambahSupply> {
               ),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                value: _selectedSupplier,
                 items: namaSupplierList.map((item) {
                   return DropdownMenuItem<String>(
                     value: item['id_supplier'],
@@ -207,6 +159,7 @@ class _TambahSupplyState extends State<TambahSupply> {
               ),
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                value: _selectedPenerima,
                 items: namaPenerimaList.map((item) {
                   return DropdownMenuItem<String>(
                     value: item['id_user'],
@@ -267,8 +220,6 @@ class _TambahSupplyState extends State<TambahSupply> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // If the form is valid, display a snackbar and proceed with the action
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Processing Data')));
                     _saveSupply();
                   }
                 },

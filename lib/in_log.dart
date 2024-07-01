@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'data.dart'; // Import ApiData for API functions
 import 'tambah_supply.dart'; // Import the TambahSupplyPage
 
 class InLogPage extends StatefulWidget {
@@ -19,16 +18,22 @@ class _InLogPageState extends State<InLogPage> {
     _fetchData();
   }
 
-  Future<void> _fetchData() async {
-    final response = await http.get(Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/pengadaan/listSupply.php'));
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchData();
+  }
 
-    if (response.statusCode == 200) {
+  Future<void> _fetchData() async {
+    try {
+      List data = await ApiSupply.fetchSupplyData();
       setState(() {
-        _data = json.decode(response.body);
+        _data = data;
         _groupDataByMonth();
       });
-    } else {
-      throw Exception('Failed to load data');
+    } catch (e) {
+      print('Error fetching data: $e');
+      // Handle error as needed
     }
   }
 
@@ -67,7 +72,7 @@ class _InLogPageState extends State<InLogPage> {
               Text('Stok: ${entry['stok']}'),
               Text('Quantity: ${entry['qty_in']}'),
               Text('Date: ${entry['date_in']}'),
-              Text('Nama Lengkap: ${entry['nama_lengkap']}'),
+              Text('Nama Penerima: ${entry['nama_lengkap']}'),
             ],
           ),
           actions: <Widget>[
@@ -87,7 +92,9 @@ class _InLogPageState extends State<InLogPage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TambahSupply()),
-    );
+    ).then((_) {
+      _fetchData(); // Refresh data when returning from TambahSupply page
+    });
   }
 
   @override
@@ -110,7 +117,7 @@ class _InLogPageState extends State<InLogPage> {
         ],
       ),
       body: _data.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: Text('Belum ada Log masuk'))
           : ListView.builder(
               itemCount: _monthlyData.keys.length,
               itemBuilder: (context, index) {
