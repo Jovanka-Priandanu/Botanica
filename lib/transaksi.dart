@@ -1,63 +1,53 @@
 import 'package:flutter/material.dart';
-import 'data.dart'; 
+import 'data.dart'; // Mengimpor file data.dart yang berisi pengolahan data API
 
-class TambahSupply extends StatefulWidget {
+class Transaksi extends StatefulWidget {
   @override
-  _TambahSupplyState createState() => _TambahSupplyState();
+  _TransaksiState createState() => _TransaksiState();
 }
 
-class _TambahSupplyState extends State<TambahSupply> {
-  // Daftar untuk menyimpan nama tanaman, supplier, dan penerima
-  List<Map<String, dynamic>> namaTanamanList = [];
-  List<Map<String, dynamic>> namaSupplierList = [];
-  List<Map<String, dynamic>> namaPenerimaList = [];
+class _TransaksiState extends State<Transaksi> {
+  List<Map<String, dynamic>> namaTanamanList = []; // Menyimpan daftar nama tanaman
+  List<Map<String, dynamic>> namaPenerimaList = []; // Menyimpan daftar nama penerima
 
-  // Controller untuk mengontrol input teks pada form
   TextEditingController _quantityController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
 
-  // Variabel untuk menyimpan nilai yang dipilih dari dropdown
-  String? _selectedTanaman;
-  String? _selectedSupplier;
-  String? _selectedPenerima;
+  String? _selectedTanaman; // Menyimpan tanaman yang dipilih
+  String? _selectedPenerima; // Menyimpan penerima yang dipilih
 
-  // Key untuk form validation
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(); // Kunci global untuk form validasi
 
   @override
   void initState() {
     super.initState();
-    fetchData(); // Memanggil fungsi untuk mengambil data dari API saat inisialisasi
+    fetchData(); // Memanggil fungsi untuk mengambil data saat inisialisasi
   }
 
   @override
   void dispose() {
-    // Membersihkan controller saat widget dihapus
-    _quantityController.dispose();
-    _dateController.dispose();
+    _quantityController.dispose(); // Membersihkan controller saat dispose
+    _dateController.dispose(); // Membersihkan controller saat dispose
     super.dispose();
   }
 
-  // Fungsi untuk mengambil data dari API
   Future<void> fetchData() async {
     try {
+      // Mengambil data nama tanaman dan nama penerima dari API
       final tanamanList = await ApiData.fetchNamaTanaman();
-      final supplierList = await ApiData.fetchNamaSupplier();
-      final penerimaList = await ApiData.fetchNamaPenerima();
+      final penerimaList = await ApiTransaksi.fetchNamaCustomer();
 
       setState(() {
-        // Mengupdate state dengan data yang diambil
-        namaTanamanList = tanamanList;
-        namaSupplierList = supplierList;
-        namaPenerimaList = penerimaList;
+        namaTanamanList = tanamanList; // Menyimpan daftar nama tanaman
+        namaPenerimaList = penerimaList; // Menyimpan daftar nama penerima
       });
     } catch (error) {
-      print('Error fetching data: $error');
+      print('Error fetching data: $error'); // Menampilkan pesan error jika gagal mengambil data
     }
   }
 
-  // Fungsi untuk memilih tanggal
   Future<void> _selectDate(BuildContext context) async {
+    // Fungsi untuk memilih tanggal
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -66,16 +56,15 @@ class _TambahSupplyState extends State<TambahSupply> {
     );
     if (selected != null)
       setState(() {
-        _dateController.text = "${selected.toLocal()}".split(' ')[0]; // Mengupdate teks field dengan tanggal yang dipilih
+        _dateController.text = "${selected.toLocal()}".split(' ')[0]; // Menyimpan tanggal yang dipilih
       });
   }
 
-  // Fungsi untuk menyimpan data supply
   Future<void> _saveSupply() async {
+    // Fungsi untuk menyimpan data transaksi
     try {
-      final response = await ApiData.saveSupply(
+      final response = await ApiTransaksi.saveTransaksi(
         idTanaman: _selectedTanaman!,
-        idSupplier: _selectedSupplier!,
         idPenerima: _selectedPenerima!,
         quantity: _quantityController.text,
         date: _dateController.text,
@@ -84,15 +73,18 @@ class _TambahSupplyState extends State<TambahSupply> {
       print('Response data: $response');
 
       bool success = response['success'] ?? false;
-      if (success) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Data gagal disimpan')));
-      } else {
+      if (!success) {
+        // Menampilkan pesan jika data gagal disimpan
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-        Navigator.of(context).pop(); // Kembali ke halaman sebelumnya setelah berhasil menyimpan data
+            Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
+      } else {
+        // Menampilkan pesan jika data berhasil disimpan dan kembali ke halaman sebelumnya
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Data gagal disimpan')));
       }
     } catch (error) {
+      // Menampilkan pesan error jika terjadi kesalahan saat menyimpan data
       print('Error menyimpan data: $error');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $error')));
     }
@@ -102,25 +94,25 @@ class _TambahSupplyState extends State<TambahSupply> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: Text('Tambah Supply', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.pink,
+        title: Text('Transaksi', style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop(); // Kembali ke halaman sebelumnya saat tombol back ditekan
+            Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
           },
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Menggunakan key untuk validasi form
+          key: _formKey,
           child: Column(
             children: [
-              // Dropdown untuk memilih nama tanaman
               DropdownButtonFormField<String>(
                 value: _selectedTanaman,
                 items: namaTanamanList.map((item) {
+                  // Menampilkan daftar nama tanaman dalam dropdown
                   return DropdownMenuItem<String>(
                     value: item['id_tanaman'],
                     child: Text('${item['nama_tanaman']} (id: ${item['id_tanaman']})'),
@@ -132,7 +124,7 @@ class _TambahSupplyState extends State<TambahSupply> {
                 ),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _selectedTanaman = newValue; // Mengupdate nilai yang dipilih
+                    _selectedTanaman = newValue; // Menyimpan pilihan tanaman
                   });
                 },
                 validator: (value) {
@@ -143,36 +135,10 @@ class _TambahSupplyState extends State<TambahSupply> {
                 },
               ),
               SizedBox(height: 16),
-              // Dropdown untuk memilih nama supplier
-              DropdownButtonFormField<String>(
-                value: _selectedSupplier,
-                items: namaSupplierList.map((item) {
-                  return DropdownMenuItem<String>(
-                    value: item['id_supplier'],
-                    child: Text('${item['nama_supplier']} (id: ${item['id_supplier']})'),
-                  );
-                }).toList(),
-                decoration: InputDecoration(
-                  labelText: 'Nama Supplier',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedSupplier = newValue; // Mengupdate nilai yang dipilih
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama Supplier tidak boleh kosong'; // Validasi jika nama supplier kosong
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Dropdown untuk memilih nama penerima
               DropdownButtonFormField<String>(
                 value: _selectedPenerima,
                 items: namaPenerimaList.map((item) {
+                  // Menampilkan daftar nama penerima dalam dropdown
                   return DropdownMenuItem<String>(
                     value: item['id_user'],
                     child: Text('${item['nama_lengkap']} (id: ${item['id_user']})'),
@@ -184,7 +150,7 @@ class _TambahSupplyState extends State<TambahSupply> {
                 ),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _selectedPenerima = newValue; // Mengupdate nilai yang dipilih
+                    _selectedPenerima = newValue; // Menyimpan pilihan penerima
                   });
                 },
                 validator: (value) {
@@ -195,7 +161,6 @@ class _TambahSupplyState extends State<TambahSupply> {
                 },
               ),
               SizedBox(height: 16),
-              // Text field untuk menginput quantity
               TextFormField(
                 controller: _quantityController,
                 keyboardType: TextInputType.number,
@@ -211,7 +176,6 @@ class _TambahSupplyState extends State<TambahSupply> {
                 },
               ),
               SizedBox(height: 16),
-              // Text field untuk menginput tanggal
               TextFormField(
                 controller: _dateController,
                 decoration: InputDecoration(
@@ -221,7 +185,7 @@ class _TambahSupplyState extends State<TambahSupply> {
                 ),
                 readOnly: true,
                 onTap: () async {
-                  await _selectDate(context); // Memilih tanggal saat text field ditekan
+                  await _selectDate(context); // Memilih tanggal
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -231,11 +195,10 @@ class _TambahSupplyState extends State<TambahSupply> {
                 },
               ),
               SizedBox(height: 16),
-              // Tombol untuk menyimpan data
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _saveSupply(); // Memanggil fungsi untuk menyimpan data jika form valid
+                    _saveSupply(); // Menyimpan data transaksi jika form valid
                   }
                 },
                 child: Text('Simpan'),

@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
-import 'tambah_tanaman.dart'; 
+import 'tambah_tanaman.dart';
 import 'edit_tanaman.dart'; // Import halaman edit tanaman
 
 class TanamanView extends StatefulWidget {
@@ -21,12 +21,6 @@ class _TanamanViewState extends State<TanamanView> {
   void initState() {
     super.initState();
     fetchTanamanData();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    fetchTanamanData(); // Refresh data when dependencies change (e.g., after adding or deleting a plant)
   }
 
   Future<void> fetchTanamanData() async {
@@ -57,10 +51,13 @@ class _TanamanViewState extends State<TanamanView> {
   }
 
   Future<void> editTanaman(String idTanaman) async {
-    Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EditTanaman(idTanaman: idTanaman)),
     );
+    if (result == true) {
+      fetchTanamanData();
+    }
   }
 
   Future<void> showDeleteConfirmationDialog(String idTanaman) async {
@@ -118,11 +115,14 @@ class _TanamanViewState extends State<TanamanView> {
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: Colors.white, size: 40),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => TambahTanaman()),
               );
+              if (result == true) {
+                fetchTanamanData();
+              }
             },
           ),
         ],

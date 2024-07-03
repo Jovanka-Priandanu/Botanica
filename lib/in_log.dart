@@ -1,29 +1,35 @@
+// import package, library, dan file
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'data.dart'; // Import ApiData for API functions
-import 'tambah_supply.dart'; // Import the TambahSupplyPage
+import 'data.dart'; 
+import 'tambah_supply.dart'; 
 
 class InLogPage extends StatefulWidget {
   @override
   _InLogPageState createState() => _InLogPageState();
 }
 
+// state log masuk
 class _InLogPageState extends State<InLogPage> {
+  // array untuk menyimpan data supply & group data berdasarkan bulan
   List _data = [];
   Map<String, List> _monthlyData = {};
 
+// fetch data supply
   @override
   void initState() {
     super.initState();
     _fetchData();
   }
 
+// fetch data supply setiap kali ada perubahan (auto refresh)
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _fetchData();
   }
 
+// fetch data supply dari API supply (data.dart)
   Future<void> _fetchData() async {
     try {
       List data = await ApiSupply.fetchSupplyData();
@@ -33,17 +39,19 @@ class _InLogPageState extends State<InLogPage> {
       });
     } catch (e) {
       print('Error fetching data: $e');
-      // Handle error as needed
     }
   }
 
+// method untuk membuat group data per bulan
   void _groupDataByMonth() {
     Map<String, List> groupedData = {};
 
+// format group bulan - tahun
     for (var entry in _data) {
       DateTime date = DateTime.parse(entry['date_in']);
       String monthYear = DateFormat('MMMM yyyy').format(date);
 
+// jika ada data baru yang berbeda bulan, maka buat group baru
       if (!groupedData.containsKey(monthYear)) {
         groupedData[monthYear] = [];
       }
@@ -56,6 +64,7 @@ class _InLogPageState extends State<InLogPage> {
     });
   }
 
+// method untuk menampilkan detail supply saat tombol info ditekan
   void _showDetailDialog(Map<String, dynamic> entry) {
     showDialog(
       context: context,
@@ -65,6 +74,7 @@ class _InLogPageState extends State<InLogPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
+            // data-data ang ditampilkan pada info detail
             children: <Widget>[
               Text('Nama Tanaman: ${entry['nama_tanaman']}'),
               Text('Jenis Tanaman: ${entry['jenis_tanaman']}'),
@@ -88,15 +98,17 @@ class _InLogPageState extends State<InLogPage> {
     );
   }
 
+// navigasi saat tombol add ditekan
   void _navigateToAddSupply() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => TambahSupply()),
     ).then((_) {
-      _fetchData(); // Refresh data when returning from TambahSupply page
+      _fetchData(); //auto refresh page setelah tambah supply
     });
   }
 
+// widget tampilan log masuk
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,6 +121,7 @@ class _InLogPageState extends State<InLogPage> {
             Navigator.of(context).pop();
           },
         ),
+        // tombol addd
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add, color: Colors.white, size: 40),
@@ -116,8 +129,10 @@ class _InLogPageState extends State<InLogPage> {
           ),
         ],
       ),
+      // jika belum ada data, maka tampilkan pesan
       body: _data.isEmpty
           ? Center(child: Text('Belum ada Log masuk'))
+          // jika ada data, maka tampilkan list view sesuai dengan group data
           : ListView.builder(
               itemCount: _monthlyData.keys.length,
               itemBuilder: (context, index) {
@@ -126,9 +141,10 @@ class _InLogPageState extends State<InLogPage> {
                 return ExpansionTile(
                   title: Text(monthKey),
                   children: monthEntries.map<Widget>((entry) {
+                    // menampilkan qty masuk dan tanggal
                     return ListTile(
-                      title: Text('Quantity: ${entry['qty_in']}'),
-                      subtitle: Text('Date: ${entry['date_in']}'),
+                      title: Text('Qty Masuk: ${entry['qty_in']}'),
+                      subtitle: Text('Tanggal: ${entry['date_in']}'),
                       trailing: IconButton(
                         icon: Icon(Icons.info_outline),
                         onPressed: () {

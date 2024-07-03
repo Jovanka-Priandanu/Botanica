@@ -7,14 +7,15 @@ class TambahSupplier extends StatefulWidget {
 }
 
 class _TambahSupplierState extends State<TambahSupplier> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _namaController = TextEditingController();
-  final TextEditingController _alamatController = TextEditingController();
-  final TextEditingController _noController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // Kunci global untuk form
+  final TextEditingController _namaController = TextEditingController(); // Controller untuk input nama
+  final TextEditingController _alamatController = TextEditingController(); // Controller untuk input alamat
+  final TextEditingController _noController = TextEditingController(); // Controller untuk input nomor
+  final TextEditingController _emailController = TextEditingController(); // Controller untuk input email
 
+  // Fungsi untuk menambah supplier
   Future<void> _tambahSupplier() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) { // Validasi form
       String nama = _namaController.text;
       String alamat = _alamatController.text;
       String no = _noController.text;
@@ -30,12 +31,12 @@ class _TambahSupplierState extends State<TambahSupplier> {
 
       if (isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Supplier berhasil ditambahkan')),
+          SnackBar(content: Text('Supplier berhasil ditambahkan')), // Tampilkan pesan sukses
         );
-        Navigator.of(context).pop(true); // Kembalikan nilai true jika berhasil
+        Navigator.of(context).pop(true); // Kembalikan nilai true jika berhasil/auto refresh
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menambahkan supplier')),
+          SnackBar(content: Text('Gagal menambahkan supplier')), // Tampilkan pesan gagal
         );
       }
     }
@@ -43,16 +44,16 @@ class _TambahSupplierState extends State<TambahSupplier> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size size = MediaQuery.of(context).size; // Mendapatkan ukuran layar
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah Supplier', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.brown,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
           },
         ),
       ),
@@ -62,6 +63,7 @@ class _TambahSupplierState extends State<TambahSupplier> {
           key: _formKey,
           child: ListView(
             children: [
+              // Input nama supplier
               TextFormField(
                 controller: _namaController,
                 decoration: InputDecoration(
@@ -70,12 +72,13 @@ class _TambahSupplierState extends State<TambahSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Nama supplier tidak boleh kosong';
+                    return 'Nama supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input alamat supplier
               TextFormField(
                 controller: _alamatController,
                 decoration: InputDecoration(
@@ -84,12 +87,13 @@ class _TambahSupplierState extends State<TambahSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Alamat supplier tidak boleh kosong';
+                    return 'Alamat supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input nomor supplier
               TextFormField(
                 controller: _noController,
                 keyboardType: TextInputType.number,
@@ -99,12 +103,13 @@ class _TambahSupplierState extends State<TambahSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'No supplier tidak boleh kosong';
+                    return 'No supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input email supplier
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -113,20 +118,21 @@ class _TambahSupplierState extends State<TambahSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Email supplier tidak boleh kosong';
+                    return 'Email supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
+              // Tombol tambah supplier
               GestureDetector(
-                onTap: _tambahSupplier,
+                onTap: _tambahSupplier, // Panggil fungsi tambah supplier saat ditekan
                 child: Container(
                   width: size.width,
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.green,
+                    color: Colors.brown,
                   ),
                   child: Center(
                     child: Text(

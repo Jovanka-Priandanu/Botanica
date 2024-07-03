@@ -7,11 +7,17 @@ class User {
   final String username;
   final String password;
   final String namaLengkap;
+  final String userClass;
+  final String alamatUser;
+  final String noUser;
 
   User({
     required this.username,
     required this.password,
     required this.namaLengkap,
+    required this.userClass,
+    required this.alamatUser,
+    required this.noUser,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -19,6 +25,9 @@ class User {
       username: json['username'],
       password: json['password'],
       namaLengkap: json['nama_lengkap'],
+      userClass: json['class'],
+      alamatUser: json['alamat_user'],
+      noUser: json['no_user'],
     );
   }
 
@@ -122,6 +131,7 @@ class ApiSupplier {
       },
     );
 
+    // cek response status
     if (response.statusCode == 200) {
       return true;
     } else {
@@ -136,6 +146,7 @@ class ApiSupplier {
       body: {'id_supplier': idSupplier},
     );
 
+  // jika respon bukan code 200, maka error
     if (response.statusCode != 200) {
       throw Exception('Gagal menghapus data supplier');
     }
@@ -182,6 +193,7 @@ class ApiSupply {
   }
 }
 
+// fetch data tanaman
 class ApiData {
   static Future<List<Map<String, dynamic>>> fetchNamaTanaman() async {
     final tanamanUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/tanaman/listTanaman.php');
@@ -202,6 +214,8 @@ class ApiData {
     }
   }
 
+
+  // fetch data supplier
   static Future<List<Map<String, dynamic>>> fetchNamaSupplier() async {
     final supplierUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/supplier/listSupplier.php');
     try {
@@ -221,6 +235,7 @@ class ApiData {
     }
   }
 
+  // fetch data penerima yang teridentifikasi class == admin
   static Future<List<Map<String, dynamic>>> fetchNamaPenerima() async {
     final userUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/user/User.php');
     try {
@@ -243,6 +258,7 @@ class ApiData {
     }
   }
 
+// API simpan penambahan data supply masuk
   static Future<Map<String, dynamic>> saveSupply({
     required String idTanaman,
     required String idSupplier,
@@ -277,3 +293,80 @@ class ApiData {
     }
   }
 }
+
+
+// API Transaksi
+// list Transaksi (view)
+class ApiTransaksi {
+  static const String baseUrl = 'https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/transaksi';
+
+  static Future<List<dynamic>> fetchTransaksiData() async {
+    final response = await http.get(Uri.parse('$baseUrl/listTransaksi.php'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+// menarik data user yang teridentifikasi class bukan admin (untuk dropdown)
+  static Future<List<Map<String, dynamic>>> fetchNamaCustomer() async {
+    final userUrl = Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/user/User.php');
+    try {
+      final responseUser = await http.get(userUrl);
+      if (responseUser.statusCode == 200) {
+        final jsonData = json.decode(responseUser.body) as List;
+        return jsonData
+            .where((item) => item['class'] != 'admin')
+            .map((item) => {
+                  'id_user': item['id_user'],
+                  'nama_lengkap': item['nama_lengkap'],
+                })
+            .toList();
+      } else {
+        throw Exception('Failed to load nama penerima data');
+      }
+    } catch (error) {
+      print('Error fetching nama penerima data: $error');
+      throw error;
+    }
+  }
+  
+  // simpan transaksi
+  static Future<Map<String, dynamic>> saveTransaksi({
+    required String idTanaman,
+    required String idPenerima,
+    required String quantity,
+    required String date,
+  }) async {
+    final addTransaksiUrl = Uri.parse('$baseUrl/addTransaksi.php');
+    try {
+      final response = await http.post(
+        addTransaksiUrl,
+        body: {
+          'id_tanaman': idTanaman,
+          'id_user': idPenerima,
+          'qty_out': quantity,
+          'date_out': date,
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to save data');
+      }
+    } catch (error) {
+      print('Error saving data: $error');
+      throw error;
+    }
+  }
+}
+
+
+
+

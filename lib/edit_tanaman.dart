@@ -1,3 +1,4 @@
+// import package, library, file
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class EditTanaman extends StatefulWidget {
   _EditTanamanState createState() => _EditTanamanState();
 }
 
+// menarik data late (dari id_tanaman)
 class _EditTanamanState extends State<EditTanaman> {
   late Future<Map<String, dynamic>> futureTanaman;
   final _formKey = GlobalKey<FormState>();
@@ -26,10 +28,12 @@ class _EditTanamanState extends State<EditTanaman> {
   File? _imageFile;
   final picker = ImagePicker();
 
+  // controller
   TextEditingController namaTanamanController = TextEditingController();
   TextEditingController jenisTanamanController = TextEditingController();
   TextEditingController hargaController = TextEditingController();
   TextEditingController stokController = TextEditingController();
+
 
   @override
   void initState() {
@@ -37,6 +41,7 @@ class _EditTanamanState extends State<EditTanaman> {
     futureTanaman = fetchTanaman(widget.idTanaman);
   }
 
+  // fetch data by id_tanaman
   Future<Map<String, dynamic>> fetchTanaman(String idTanaman) async {
     final response = await http.get(
       Uri.parse('https://mi05421.my.id/api_uas_jovanka/API-UAS-jovanka/tanaman/detailTanaman.php?id_tanaman=$idTanaman'),
@@ -49,6 +54,7 @@ class _EditTanamanState extends State<EditTanaman> {
     }
   }
 
+// menyimpan data edit tanaman dengan api edit
   Future<void> saveTanaman() async {
     String imagePath = _image;
 
@@ -69,20 +75,23 @@ class _EditTanamanState extends State<EditTanaman> {
       },
     );
 
+// pesan kondisi jika berhasil/gagal
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Tanaman berhasil diperbarui')));
       Navigator.pop(context, true); // Return to the previous screen with a success flag
     } else {
-      throw Exception('Failed to update tanaman');
+      throw Exception('gagal update tanaman');
     }
   }
 
+  // menyimpan gambar secara lokal/device (karena belum tau cara masukin ke direktori fluter)
   Future<String> saveImageLocally(String namaTanaman) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final imagePath = path.join(directory.path, 'images');
       await Directory(imagePath).create(recursive: true);
 
+      // format gambar yang tersimpan berupa nama_tanaman + tanggal
       String timestamp = DateTime.now().toString().substring(0, 10).replaceAll('-', '');
       final fileName = '$namaTanaman$timestamp.jpg'; // Adjust the file name format as needed
       final filePath = '$imagePath/$fileName';
@@ -98,15 +107,19 @@ class _EditTanamanState extends State<EditTanaman> {
     }
   }
 
+
+// menarik data image dari path lokal (yg sudah tersimpan di device)
   Future<String> _getImagePath(String imageName) async {
     final directory = await getApplicationDocumentsDirectory();
     final imagePath = path.join(directory.path, 'images', imageName);
     return imagePath;
   }
 
+// menarik gambar dari galeri 
   Future<void> _getFromGallery() async {
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
+      // size
       maxWidth: 1800,
       maxHeight: 1800,
     );
@@ -114,10 +127,13 @@ class _EditTanamanState extends State<EditTanaman> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
+        // refresh page setiap merubah gambar
+        futureTanaman = fetchTanaman(widget.idTanaman);
       });
     }
   }
 
+// ambil gambar dari kamera
   Future<void> _getFromCamera() async {
     final pickedFile = await picker.pickImage(
       source: ImageSource.camera,
@@ -128,17 +144,20 @@ class _EditTanamanState extends State<EditTanaman> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
+        // refrresh page
+        futureTanaman = fetchTanaman(widget.idTanaman);
       });
     }
   }
 
+// tampilan edit form
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Tanaman', style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.green,
-         leading: IconButton(
+        leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
@@ -153,8 +172,9 @@ class _EditTanamanState extends State<EditTanaman> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData) {
-            return Center(child: Text('No data found'));
+            return Center(child: Text('Data tidak ditemukan'));
           } else {
+            // menampilkan value data yang tersimpan pada field input
             Map<String, dynamic> tanaman = snapshot.data!;
             namaTanamanController.text = tanaman['nama_tanaman'];
             jenisTanamanController.text = tanaman['jenis_tanaman'];
@@ -169,6 +189,7 @@ class _EditTanamanState extends State<EditTanaman> {
                 child: ListView(
                   children: <Widget>[
                     FutureBuilder<String>(
+                      // menarik gambar
                       future: _getImagePath(_image),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
@@ -181,6 +202,7 @@ class _EditTanamanState extends State<EditTanaman> {
                         }
                       },
                     ),
+                    // tombol input image
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -197,6 +219,7 @@ class _EditTanamanState extends State<EditTanaman> {
                         ),
                       ],
                     ),
+                    // FOrm edit
                     TextFormField(
                       controller: namaTanamanController,
                       decoration: InputDecoration(labelText: 'Nama Tanaman'),
@@ -227,6 +250,9 @@ class _EditTanamanState extends State<EditTanaman> {
                         }
                         return null;
                       },
+                      onChanged: (value) {
+                        _harga = value;
+                      },
                     ),
                     TextFormField(
                       controller: stokController,
@@ -238,10 +264,14 @@ class _EditTanamanState extends State<EditTanaman> {
                         }
                         return null;
                       },
+                      onChanged: (value) {
+                        _stok = value;
+                      },
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
+                        // validasi input tidak boleh kosong
                         if (_formKey.currentState!.validate()) {
                           setState(() {
                             _namaTanaman = namaTanamanController.text;
@@ -249,26 +279,26 @@ class _EditTanamanState extends State<EditTanaman> {
                             _harga = hargaController.text;
                             _stok = stokController.text;
                           });
-                          saveTanaman(); // Save the edited tanaman
+                          saveTanaman(); // Save edit tanaman
                         }
                       },
                       child: Container(
-                      width: 100,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.green,
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Tambah',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                        width: 100,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.green,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Tambah',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     ),
                   ],
                 ),

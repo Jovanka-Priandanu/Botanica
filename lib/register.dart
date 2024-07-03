@@ -1,3 +1,4 @@
+// import package
 import 'package:flutter/material.dart';
 import 'data.dart';
 import 'main.dart';
@@ -7,16 +8,20 @@ class RegisterPage extends StatefulWidget {
   _RegisterPageState createState() => _RegisterPageState();
 }
 
+// class registrasi
 class _RegisterPageState extends State<RegisterPage> {
+  // controller
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _namaLengkapController = TextEditingController();
 
+// variabel controler
   Future<void> createAccount() async {
     String username = _usernameController.text;
     String password = _passwordController.text;
     String namaLengkap = _namaLengkapController.text;
 
+// validasi input kosong
     if (username.isEmpty || password.isEmpty || namaLengkap.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -30,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
       var response = await createUser(username, password, namaLengkap);
 
       if (response.statusCode == 200) {
-        // Account created successfully
+        // Alert saat berhasil registrasi untuk kembali ke loginpage
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -53,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         );
       } else {
-        // Failed to create account
+        // Jika Gagal membuat account
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -73,7 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
-      // Exception occurred
+      // Exception 
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -94,12 +99,14 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+// tampilan utama register
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
           Container(
+            // background
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/login-bg.png'),
@@ -108,6 +115,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
           Center(
+            // scroll biar gak overlown
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -125,6 +133,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ],
                   ),
+                  // Input form registrasi
                   SizedBox(height: 20),
                   TextField(
                     controller: _usernameController,
@@ -192,6 +201,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
+                  // saat tombol ditekan akan menuju ke method createAccount
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: createAccount,
@@ -202,6 +212,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     child: Text('Register', style: TextStyle(color: Colors.green)),
                   ),
+                  // tombol kembali ke halaman login
                   SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerRight,

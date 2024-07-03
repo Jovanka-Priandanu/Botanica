@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'data.dart';
 
+// Widget untuk halaman edit supplier
 class EditSupplier extends StatefulWidget {
-  final Supplier supplier;
+  final Supplier supplier; // data Supplier yang akan diedit
 
   EditSupplier({required this.supplier});
 
@@ -11,23 +12,25 @@ class EditSupplier extends StatefulWidget {
 }
 
 class _EditSupplierState extends State<EditSupplier> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _namaController;
-  late TextEditingController _alamatController;
-  late TextEditingController _noController;
-  late TextEditingController _emailController;
+  final _formKey = GlobalKey<FormState>(); // Kunci global untuk form
+  late TextEditingController _namaController; // Controller untuk input nama
+  late TextEditingController _alamatController; // Controller untuk input alamat
+  late TextEditingController _noController; // Controller untuk input nomor
+  late TextEditingController _emailController; // Controller untuk input email
 
   @override
   void initState() {
     super.initState();
+    // Inisialisasi controller dengan data supplier yang akan diedit
     _namaController = TextEditingController(text: widget.supplier.namaSupplier);
     _alamatController = TextEditingController(text: widget.supplier.alamatSupplier);
     _noController = TextEditingController(text: widget.supplier.noSupplier);
     _emailController = TextEditingController(text: widget.supplier.email);
   }
 
+  // Fungsi untuk mengedit supplier
   Future<void> _editSupplier() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) { // Validasi form
       String idSupplier = widget.supplier.idSupplier;
       String nama = _namaController.text;
       String alamat = _alamatController.text;
@@ -45,12 +48,12 @@ class _EditSupplierState extends State<EditSupplier> {
 
       if (isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Data supplier berhasil diubah')),
+          SnackBar(content: Text('Data supplier berhasil diubah')), // Tampilkan pesan sukses
         );
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(true); // Kembalikan nilai true jika berhasil
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengubah data supplier')),
+          SnackBar(content: Text('Gagal mengubah data supplier')), // Tampilkan pesan gagal
         );
       }
     }
@@ -58,7 +61,7 @@ class _EditSupplierState extends State<EditSupplier> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size size = MediaQuery.of(context).size; // Mendapatkan ukuran layar
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +70,7 @@ class _EditSupplierState extends State<EditSupplier> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
           },
         ),
       ),
@@ -77,6 +80,7 @@ class _EditSupplierState extends State<EditSupplier> {
           key: _formKey,
           child: ListView(
             children: [
+              // Input nama supplier
               TextFormField(
                 controller: _namaController,
                 decoration: InputDecoration(
@@ -85,12 +89,13 @@ class _EditSupplierState extends State<EditSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Nama supplier tidak boleh kosong';
+                    return 'Nama supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input alamat supplier
               TextFormField(
                 controller: _alamatController,
                 decoration: InputDecoration(
@@ -99,12 +104,13 @@ class _EditSupplierState extends State<EditSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Alamat supplier tidak boleh kosong';
+                    return 'Alamat supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input nomor supplier
               TextFormField(
                 controller: _noController,
                 keyboardType: TextInputType.number,
@@ -114,12 +120,13 @@ class _EditSupplierState extends State<EditSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'No supplier tidak boleh kosong';
+                    return 'No supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 10),
+              // Input email supplier
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -128,14 +135,15 @@ class _EditSupplierState extends State<EditSupplier> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Email supplier tidak boleh kosong';
+                    return 'Email supplier tidak boleh kosong'; // Validasi jika kosong
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
+              // Tombol simpan perubahan
               ElevatedButton(
-                onPressed: _editSupplier,
+                onPressed: _editSupplier, // Panggil fungsi edit supplier saat ditekan
                 child: Text('Simpan', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
