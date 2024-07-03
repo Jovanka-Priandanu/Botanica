@@ -66,7 +66,7 @@ class _EditSupplierState extends State<EditSupplier> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Supplier', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.brown,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -146,7 +146,7 @@ class _EditSupplierState extends State<EditSupplier> {
                 onPressed: _editSupplier, // Panggil fungsi edit supplier saat ditekan
                 child: Text('Simpan', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.brown,
                   minimumSize: Size(size.width, 50),
                 ),
               ),
